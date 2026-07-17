@@ -1,30 +1,99 @@
-# Monster Arena
+# Monster Arena (C RPG)
 
-Monster Arena is a terminal-based turn-based combat prototype written in C.
-
-The goal of this project is to practice core C concepts by building a small game from scratch instead of isolated exercises.
+A terminal-based RPG written in C as a learning project focused on pointers, structs, game architecture, and software design.
 
 ## Features
 
-- Character creation
-- Three playable classes
-- Three enemy types
+- Choose one of three player classes
+- Battle one of three enemy types
 - Turn-based combat
-- Attack, Heal, and Block actions
+- Attack
+- Heal
+- Block
 - Basic enemy AI
-- HP management and death detection
+- Fight multiple enemies in succession
+- Restart game after defeat
 
-## Current Status
+## Build & Run
 
-✅ Version 1.0.0
+Compile:
 
-This is the first playable prototype.
+```bash
+gcc main.c -o monster_arena
+```
 
-## Future Plans
+Run:
 
-- Input validation
-- Better enemy AI
+```bash
+./monster_arena
+```
+
+Windows:
+
+```bash
+monster_arena.exe
+```
+
+## Technologies
+
+- Language: C
+- Compiler: GCC (or any C99-compatible compiler)
+
+## Project Goals
+
+This project was created to strengthen understanding of:
+
+- Structs
+- Pointers
+- Function decomposition
+- Program architecture
+- State management
+- Combat systems
+- Memory layout
+- Git & GitHub workflow
+
+## Roadmap
+
+### v1.0.x
+
+- [x] Character selection
+- [x] Enemy selection
+- [x] Turn-based combat
+- [x] Attack
+- [x] Heal
+- [x] Block
+- [x] Basic enemy AI
+- [x] Arena loop
+
+### v1.1.0
+
+- [ ] Experience system
+- [ ] Leveling
+- [ ] Stat progression
+
+### v1.2.0
+
+- [ ] Skills
+- [ ] Mana costs
+- [ ] New combat abilities
+
+### Future Ideas
+
+- Inventory
+- Equipment
+- Status effects
 - Critical hits
-- Mana-based abilities
-- Inventory system
-- Split project into multiple source files
+- Save/Load system
+- Boss enemies
+
+## Project Structure
+
+```
+main.c
+README.md
+CHANGELOG.md
+```
+
+## Current Release
+
+**v1.0.1**
