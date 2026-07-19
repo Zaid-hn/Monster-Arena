@@ -11,6 +11,9 @@ A terminal-based RPG written in C as a learning project focused on pointers, str
 - Heal
 - Block
 - Basic enemy AI
+- Experience system
+- Player leveling
+- Spend stat points to upgrade character attributes
 - Fight multiple enemies in succession
 - Restart game after defeat
 
@@ -34,11 +37,6 @@ Windows:
 monster_arena.exe
 ```
 
-## Technologies
-
-- Language: C
-- Compiler: GCC (or any C99-compatible compiler)
-
 ## Project Goals
 
 This project was created to strengthen understanding of:
@@ -51,6 +49,11 @@ This project was created to strengthen understanding of:
 - Combat systems
 - Memory layout
 - Git & GitHub workflow
+
+## Technologies
+
+- Language: C
+- Compiler: GCC (or any C99-compatible compiler)
 
 ## Roadmap
 
@@ -67,9 +70,9 @@ This project was created to strengthen understanding of:
 
 ### v1.1.0
 
-- [ ] Experience system
-- [ ] Leveling
-- [ ] Stat progression
+- [x] Experience system
+- [x] Leveling
+- [x] Stat progression
 
 ### v1.2.0
 
@@ -96,4 +99,4 @@ CHANGELOG.md
 
 ## Current Release
 
-**v1.0.1**
+**v1.1.0**

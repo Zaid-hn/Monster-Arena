@@ -6,6 +6,39 @@ The format is inspired by Keep a Changelog and the project follows Semantic Vers
 
 ---
 
+## [v1.1.0] - 2026-07-20
+
+### Added
+
+- Experience (XP) reward system after defeating enemies.
+- Player leveling system.
+- Stat point rewards on level up.
+- Character stat progression.
+- Stat allocation system allowing players to upgrade:
+  - Health
+  - Mana
+  - Attack Power
+
+### Changed
+
+- Refactored combat flow into smaller dedicated functions:
+  - `player_action()`
+  - `enemy_action()`
+  - `player_attack()`
+  - `enemy_attack()`
+  - `character_attack()`
+- Moved experience rewards outside of the combat loop to separate combat resolution from game progression.
+- Refactored stat upgrade logic into dedicated helper functions:
+  - `select_stat()`
+  - `spend_stat_points()`
+- Improved separation of responsibilities throughout the combat and progression systems.
+- Improved overall project organization and readability.
+
+### Fixed
+
+- Prevented crashes caused by invalid stat selections during stat allocation.
+- Improved combat flow after victories and progression handling.
+
 ## [v1.0.1] - 2026-07-17
 
 ### Added
