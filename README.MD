@@ -10,6 +10,9 @@ A terminal-based RPG written in C as a learning project focused on pointers, str
 - Attack
 - Heal
 - Block
+- Unlockable skills
+- Skill Point (SP) progression
+- Mana-based skill casting
 - Basic enemy AI
 - Experience system
 - Player leveling
@@ -76,8 +79,16 @@ This project was created to strengthen understanding of:
 
 ### v1.2.0
 
-- [ ] Skills
-- [ ] Mana costs
+- [x] Skills
+- [x] Mana costs
+- [x] Skill progression
+- [x] Skill unlocking
+
+### v1.3.0
+
+- [ ] Additional skill effects
+- [ ] Status effects
+- [ ] Enemy skills
 - [ ] New combat abilities
 
 ### Future Ideas
@@ -97,6 +108,18 @@ README.md
 CHANGELOG.md
 ```
 
+## Current Architecture
+
+The project is currently organized into several gameplay systems:
+
+- Character system
+- Combat system
+- Experience and leveling system
+- Stat progression system
+- Skill progression system
+
+Although the project is written in procedural C, it is organized into modular gameplay systems using structs and function decomposition. The primary goal is to practice software architecture, pointers, and state management while building a larger-scale terminal RPG.
+
 ## Current Release
 
-**v1.1.0**
+**v1.2.0**

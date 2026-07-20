@@ -6,6 +6,45 @@ The format is inspired by Keep a Changelog and the project follows Semantic Vers
 
 ---
 
+## [v1.2.0] - 2026-07-20
+
+### Added
+
+- Skill progression system.
+- Three unlockable skills:
+  - Fireball
+  - Icicle
+  - Poison Ivy
+- Skill Point (SP) rewards on level up.
+- Skill purchasing system.
+- Combat skill menu.
+- Mana cost system for skills.
+- Player skill inventory using `PlayerSkill`.
+- Global immutable skill database (`ALL_SKILLS`).
+
+### Changed
+
+- Refactored skill-related logic into dedicated functions:
+  - `initialize_skills()`
+  - `display_locked_skills()`
+  - `display_player_skills()`
+  - `choose_skill()`
+  - `select_skill()`
+  - `buy_skill()`
+  - `cast_skill()`
+  - `use_skill()`
+- Extended the combat menu with a dedicated Skills action.
+- Character initialization now includes skill initialization.
+- Character model now distinguishes between current mana and maximum mana.
+- Improved combat architecture by separating skill selection, purchasing, and casting responsibilities.
+
+### Fixed
+
+- Prevented crashes caused by invalid skill selections.
+- Added validation when purchasing and casting skills.
+- Prevented invalid pointer dereferences when skill selection fails.
+- Improved handling of insufficient mana during skill usage.
+
 ## [v1.1.0] - 2026-07-20
 
 ### Added
