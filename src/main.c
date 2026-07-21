@@ -3,13 +3,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <ctype.h>
 
 // MACROS SECTION //
 
 #define MAXCLASSES 3
 #define CLASSSTATS 3
 
-#define MAXSKILLS 3
+#define ENEMYATTRIBS 1
+
+#define MAXSPELLS 4
 
 // STRUCTS SECTION //
 
@@ -20,6 +23,13 @@ struct CharacterClass
     int basehp;
     int basemana;
     int baseattackpower;
+};
+
+struct EnemyData
+{
+    const struct CharacterClass *character_class;
+
+    int xp_reward;
 };
 
 struct Character
@@ -37,25 +47,35 @@ struct Character
     bool isblocking;
 };
 
+struct Spell
+{
+    char spell_name[31];
+
+    int spell_cost;
+    int mana_cost;
+    int damage;
+};
+
+const struct Spell ALL_SPELLS[MAXSPELLS] = {
+    {"Fireball", 0, 10, 14},
+    {"Icicle", 15, 8, 12},
+    {"Poison Ivy", 25, 18, 6},
+    {"Thunder Strike", 40, 20, 50}};
+
+struct PlayerSpell
+{
+    const struct Spell *spell;
+
+    bool is_unlocked;
+};
+
 struct Skill
 {
     char skill_name[31];
 
     int skill_cost;
-    int mana_cost;
+    int stamina_cost;
     int damage;
-};
-
-const struct Skill ALL_SKILLS[MAXSKILLS] = {
-    {"Fireball", 0, 10, 14},
-    {"Icicle", 15, 8, 12},
-    {"Poison Ivy", 35, 18, 6}};
-
-struct PlayerSkill
-{
-    const struct Skill *skill;
-
-    bool is_unlocked;
 };
 
 struct Player
@@ -68,16 +88,16 @@ struct Player
     int level_xp;
     int stat_points;
 
-    struct PlayerSkill skills[MAXSKILLS];
-    int skill_points;
-    int skill_count;
+    struct PlayerSpell spells[MAXSPELLS];
+    int spell_points;
+    int spell_count;
 };
 
 struct Enemy
 {
     struct Character character;
 
-    int xp_reward;
+    const struct EnemyData *enemydata;
 };
 
 const struct CharacterClass PLAYERCLASSES[MAXCLASSES] = {
@@ -90,6 +110,18 @@ const struct CharacterClass ENEMYCLASSES[MAXCLASSES] = {
     {"Orc", 120, 10, 43},
     {"Troll", 300, 280, 130}};
 
+enum ENEMYTYPES
+{
+    GOBLIN,
+    ORC,
+    TROLL
+};
+
+const struct EnemyData ENEMYDATA[MAXCLASSES] = {
+    {&(ENEMYCLASSES[GOBLIN]), 20},
+    {&(ENEMYCLASSES[ORC]), 80},
+    {&(ENEMYCLASSES[TROLL]), 200}};
+
 // ENUMS SECTION //
 
 enum COMBAT_ACTIONS
@@ -97,8 +129,16 @@ enum COMBAT_ACTIONS
     ATTACK = 1,
     BLOCK,
     HEAL,
-    SKILLS,
+    SPELLS,
     FORFEIT
+};
+
+enum SPELL_EFFECTS
+{
+    DAMAGE = 1,
+    BURN,
+    FREEZE,
+    POISON
 };
 
 // FUNCTION PROTOTYPES //
@@ -135,9 +175,9 @@ void display_stats(struct Character *character);
 
 void display_stat_points(struct Player *player);
 
-void initialize_character(const struct CharacterClass characterclass[], struct Character *character);
+int initialize_character(const struct CharacterClass characterclass[], struct Character *character);
 
-void initialize_skills(const struct Skill skills[], struct PlayerSkill playerskills[]);
+void initialize_spells(const struct Spell spells[], struct PlayerSpell playerspells[]);
 
 void player_select(struct Player *player);
 
@@ -163,7 +203,9 @@ void player_attack(struct Player *player, struct Enemy *enemy);
 
 void enemy_attack(struct Enemy *enemy, struct Player *player);
 
-struct PlayerSkill *choose_skill(struct Player *player);
+int choose_spell_input(struct Player *player);
+
+struct PlayerSpell *choose_spell(int chosen_spell, struct Player *player);
 
 int player_action();
 
@@ -187,19 +229,19 @@ void increase_stats(struct Player *player);
 
 void level_up(struct Player *player);
 
-// SKILLS SYSTEM //
+// SPELLS SYSTEM //
 
-void display_locked_skills(const struct PlayerSkill playerskills[]);
+void display_locked_spells(const struct PlayerSpell playerspells[]);
 
-void display_player_skills(const struct Player *player);
+void display_player_spells(const struct Player *player);
 
-struct PlayerSkill *select_skill(struct Player *player);
+struct PlayerSpell *select_spell(struct Player *player);
 
-void buy_skill(struct Player *player, struct PlayerSkill *skill);
+void buy_spell(struct Player *player, struct PlayerSpell *spell);
 
-void skills_menu(struct Player *player);
+void spells_menu(struct Player *player);
 
-void use_skill(struct PlayerSkill *player_skill, struct Player *player, struct Enemy *enemy);
+void use_spell(struct PlayerSpell *player_spell, struct Player *player, struct Enemy *enemy);
 
 // MAIN SECTION //
 
@@ -300,7 +342,7 @@ int select_class()
     return class_choice;
 }
 
-void initialize_character(const struct CharacterClass characterclass[], struct Character *character)
+int initialize_character(const struct CharacterClass characterclass[], struct Character *character)
 {
     int classchoice = select_class();
 
@@ -315,14 +357,16 @@ void initialize_character(const struct CharacterClass characterclass[], struct C
     character->attack_power = characterclass[classchoice - 1].baseattackpower;
 
     character->isblocking = false;
+
+    return classchoice;
 }
 
-void initialize_skills(const struct Skill skills[], struct PlayerSkill playerskills[])
+void initialize_spells(const struct Spell spells[], struct PlayerSpell playerspells[])
 {
-    for (int i = 0; i < MAXSKILLS; i++)
+    for (int i = 0; i < MAXSPELLS; i++)
     {
-        playerskills[i].skill = &(skills[i]);
-        playerskills[i].is_unlocked = false;
+        playerspells[i].spell = &(spells[i]);
+        playerspells[i].is_unlocked = false;
     }
 }
 
@@ -336,19 +380,19 @@ void player_select(struct Player *player)
     player->level_xp = 40;
     player->stat_points = 0;
 
-    player->skill_count = 0;
-    player->skill_points = 0;
+    player->spell_count = 0;
+    player->spell_points = 0;
 
-    initialize_skills(ALL_SKILLS, player->skills);
-    buy_skill(player, &(player->skills[0]));
+    initialize_spells(ALL_SPELLS, player->spells);
+    buy_spell(player, &(player->spells[0]));
 }
 
 void enemy_select(struct Enemy *enemy)
 {
     display_classes(ENEMYCLASSES);
-    initialize_character(ENEMYCLASSES, &(enemy->character));
+    int classchoice = initialize_character(ENEMYCLASSES, &(enemy->character));
 
-    enemy->xp_reward = 20;
+    enemy->enemydata = &(ENEMYDATA[classchoice - 1]);
 }
 
 void get_player_name(struct Player *player)
@@ -427,7 +471,7 @@ void character_block(struct Character *character)
 int player_action()
 {
     int combat_choice;
-    printf("\n1. Attack\n2. Block\n3. Heal\n4. Skills\n5. Run away\n\n");
+    printf("\n1. Attack\n2. Block\n3. Heal\n4. Spells\n5. Run away\n\n");
     printf("> ");
     scanf("%d", &combat_choice);
 
@@ -442,34 +486,57 @@ int enemy_action()
     return enemy_combat_choice;
 }
 
-struct PlayerSkill *choose_skill(struct Player *player)
+int choose_spell_input(struct Player *player)
 {
-    int chosen_skill;
+    int chosen_spell;
     printf("\n> ");
-    scanf("%d", &chosen_skill);
+    scanf("%d", &chosen_spell);
 
-    if (chosen_skill < 1 || chosen_skill > (player->skill_count))
+    if (chosen_spell < 1 || chosen_spell > (player->spell_count))
     {
-        return NULL;
+        return 0;
     }
 
-    return &(player->skills[chosen_skill - 1]);
+    return chosen_spell;
 }
 
-void cast_skill(struct Player *player, struct Enemy *enemy)
+struct PlayerSpell *choose_spell(int chosen_spell, struct Player *player)
 {
-    display_player_skills(player);
-    struct PlayerSkill *skill = choose_skill(player);
-    use_skill(skill, player, enemy);
+    int locked = 0;
 
-    if (!(skill == NULL))
+    for (int i = 0; i < MAXSPELLS; i++)
     {
-        printf("\nCast %s\n", skill->skill->skill_name);
-        printf("\nEnemy -%d Hp", skill->skill->damage);
+        if (!(chosen_spell == 0))
+        {
+            if (player->spells[(chosen_spell - 1) + locked].is_unlocked)
+            {
+                return &(player->spells[(chosen_spell - 1) + locked]);
+            }
+            else
+            {
+                locked++;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+void cast_spell(struct Player *player, struct Enemy *enemy)
+{
+    display_player_spells(player);
+    int spell_select_input = choose_spell_input(player);
+    struct PlayerSpell *spell = choose_spell(spell_select_input, player);
+    use_spell(spell, player, enemy);
+
+    if (!(spell == NULL))
+    {
+        printf("\nCast %s\n", spell->spell->spell_name);
+        printf("\nEnemy -%d Hp", spell->spell->damage);
     }
     else
     {
-        printf("\nInvalid skill\n");
+        printf("\nInvalid spell\n");
     }
 }
 
@@ -495,8 +562,8 @@ bool player_turn(struct Player *player, struct Enemy *enemy)
         printf("\nSuccessfully healed..");
         printf("\n> Current Hp: %d\n", player->character.currenthp);
         break;
-    case SKILLS:
-        cast_skill(player, enemy);
+    case SPELLS:
+        cast_spell(player, enemy);
         break;
     case FORFEIT:
         continue_combat = false;
@@ -531,7 +598,7 @@ void enemy_turn(struct Player *player, struct Enemy *enemy)
 
 void give_xp(struct Player *player, struct Enemy *enemy)
 {
-    player->xp += enemy->xp_reward;
+    player->xp += enemy->enemydata->xp_reward;
 }
 
 void combat(struct Player *player, struct Enemy *enemy)
@@ -572,9 +639,9 @@ void level_up(struct Player *player)
         player->stat_points += 10;
         player->level_xp *= 2;
 
-        player->skill_points += 15;
+        player->spell_points += 15;
         increase_stats(player);
-        skills_menu(player);
+        spells_menu(player);
     }
 }
 
@@ -643,55 +710,64 @@ void increase_stats(struct Player *player)
 
 // ------------------------------------------------------- //
 
-void display_locked_skills(const struct PlayerSkill playerskills[])
+void display_locked_spells(const struct PlayerSpell playerspells[])
 {
-    int unlocked_skills = 0;
+    int unlocked_spells = 0;
 
-    for (int i = 0; i < MAXSKILLS; i++)
+    for (int i = 0; i < MAXSPELLS; i++)
     {
-        if (!(playerskills[i].is_unlocked))
+        if (!(playerspells[i].is_unlocked))
         {
-            printf("\n%d. %s (%d SP)", (i - unlocked_skills) + 1, playerskills[i].skill->skill_name, playerskills[i].skill->skill_cost);
+            printf("\n%d. %s (%d SP)", (i - unlocked_spells) + 1, playerspells[i].spell->spell_name, playerspells[i].spell->spell_cost);
         }
         else
         {
-            unlocked_skills++;
+            unlocked_spells++;
         }
     }
 }
 
-void display_player_skills(const struct Player *player)
+void display_player_spells(const struct Player *player)
 {
-    for (int i = 0; i < player->skill_count; i++)
+    int locked = 0;
+
+    for (int i = 0; i < MAXSPELLS; i++)
     {
-        printf("\n%d. %s", i + 1, player->skills[i].skill->skill_name);
+        if (player->spells[i].is_unlocked)
+        {
+            printf("\n%d. %s", (i + 1) - locked, player->spells[i].spell->spell_name);
+        }
+        else
+        {
+            locked++;
+        }
     }
 }
 
-struct PlayerSkill *select_skill(struct Player *player)
+struct PlayerSpell *select_spell(struct Player *player)
 {
-    int chosen_skill;
-    printf("\nLearn skill: ");
-    scanf("%d", &chosen_skill);
+    int chosen_spell;
+    printf("\nLearn spell: ");
+    scanf("%d", &chosen_spell);
 
-    if (chosen_skill < 1 || chosen_skill > (MAXSKILLS - player->skill_count))
+    if (chosen_spell < 1 || chosen_spell > (MAXSPELLS - player->spell_count))
     {
         return NULL;
     }
 
-    return &(player->skills[(chosen_skill - 1) + player->skill_count]);
+    return &(player->spells[(chosen_spell - 1) + player->spell_count]);
 }
 
-void buy_skill(struct Player *player, struct PlayerSkill *skill)
+void buy_spell(struct Player *player, struct PlayerSpell *spell)
 {
-    if (!(skill == NULL))
+    if (!(spell == NULL))
     {
-        if (player->skill_points >= skill->skill->skill_cost)
+        if (player->spell_points >= spell->spell->spell_cost)
         {
-            skill->is_unlocked = true;
-            player->skill_count++;
+            spell->is_unlocked = true;
+            player->spell_count++;
 
-            player->skill_points -= skill->skill->skill_cost;
+            player->spell_points -= spell->spell->spell_cost;
         }
         else
         {
@@ -700,35 +776,35 @@ void buy_skill(struct Player *player, struct PlayerSkill *skill)
     }
     else
     {
-        printf("Invalid skill");
+        printf("Invalid spell");
     }
 }
 
-void skills_menu(struct Player *player)
+void spells_menu(struct Player *player)
 {
-    display_locked_skills(player->skills);
+    display_locked_spells(player->spells);
 
-    printf("\nCurrent SP: %d\n", player->skill_points);
-    struct PlayerSkill *skill = select_skill(player);
+    printf("\nCurrent SP: %d\n", player->spell_points);
+    struct PlayerSpell *spell = select_spell(player);
 
-    buy_skill(player, skill);
+    buy_spell(player, spell);
 
-    if (!(skill == NULL))
+    if (!(spell == NULL))
     {
-        printf("\nLearnt %s\n", skill->skill->skill_name);
+        printf("\nLearnt %s\n", spell->spell->spell_name);
     }
 }
 
-void use_skill(struct PlayerSkill *player_skill, struct Player *player, struct Enemy *enemy)
+void use_spell(struct PlayerSpell *player_spell, struct Player *player, struct Enemy *enemy)
 {
-    if (!(player_skill == NULL))
+    if (!(player_spell == NULL))
     {
-        if (player_skill->is_unlocked)
+        if (player_spell->is_unlocked)
         {
-            if (player->character.mana >= player_skill->skill->mana_cost)
+            if (player->character.mana >= player_spell->spell->mana_cost)
             {
-                player->character.mana -= player_skill->skill->mana_cost;
-                take_damage(player_skill->skill->damage, &(enemy->character));
+                player->character.mana -= player_spell->spell->mana_cost;
+                take_damage(player_spell->spell->damage, &(enemy->character));
             }
             else
             {

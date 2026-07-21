@@ -10,15 +10,16 @@ A terminal-based RPG written in C as a learning project focused on pointers, str
 - Attack
 - Heal
 - Block
-- Unlockable skills
-- Skill Point (SP) progression
-- Mana-based skill casting
-- Basic enemy AI
+- Unlockable spells
+- Spell Point (SP) progression
+- Mana-based spell casting
 - Experience system
 - Player leveling
-- Spend stat points to upgrade character attributes
+- Stat point allocation
+- Individual XP rewards for each enemy
 - Fight multiple enemies in succession
 - Restart game after defeat
+- Basic enemy AI
 
 ## Build & Run
 
@@ -79,17 +80,23 @@ This project was created to strengthen understanding of:
 
 ### v1.2.0
 
-- [x] Skills
+- [x] Spell system
 - [x] Mana costs
-- [x] Skill progression
-- [x] Skill unlocking
+- [x] Spell progression
+- [x] Spell unlocking
 
 ### v1.3.0
 
-- [ ] Additional skill effects
+- [x] Enemy data definitions
+- [x] Per-enemy XP rewards
+- [x] Refactored enemy architecture
+
+### Planned
+
 - [ ] Status effects
-- [ ] Enemy skills
-- [ ] New combat abilities
+- [ ] Spell effects
+- [ ] Enemy spell casting
+- [ ] Additional combat abilities
 
 ### Future Ideas
 
@@ -110,16 +117,25 @@ CHANGELOG.md
 
 ## Current Architecture
 
-The project is currently organized into several gameplay systems:
+The project is organized into several gameplay systems:
 
 - Character system
 - Combat system
+- Spell system
 - Experience and leveling system
 - Stat progression system
-- Skill progression system
+- Enemy data system
+
+The architecture separates immutable game definitions from mutable runtime state:
+
+- `CharacterClass` — Base class definitions
+- `EnemyData` — Enemy-specific immutable data
+- `Character` — Runtime combat state
+- `Player` / `Enemy` — Gameplay entities
+- `Spell` / `PlayerSpell` — Spell definitions and player progression
 
 Although the project is written in procedural C, it is organized into modular gameplay systems using structs and function decomposition. The primary goal is to practice software architecture, pointers, and state management while building a larger-scale terminal RPG.
 
 ## Current Release
 
-**v1.2.0**
+**v1.3.0**

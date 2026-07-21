@@ -6,6 +6,32 @@ The format is inspired by Keep a Changelog and the project follows Semantic Vers
 
 ---
 
+## [v1.3.0] - 2026-07-21
+
+### Added
+
+- Enemy data system (`EnemyData`).
+- Individual XP rewards for each enemy type.
+- Enemy type definitions using immutable data tables.
+
+### Changed
+
+- Renamed the Skill system to the Spell system throughout the project.
+- Refactored enemy initialization to separate immutable enemy definitions from runtime enemy state.
+- Character initialization now returns the selected class index, allowing enemy data and character data to remain synchronized.
+- Enemy instances now reference immutable `EnemyData` instead of storing duplicated XP values.
+- Improved project architecture by separating:
+  - Runtime character state (`Character`)
+  - Character templates (`CharacterClass`)
+  - Enemy-specific data (`EnemyData`)
+
+### Fixed
+
+- Eliminated duplicated XP values stored directly in enemy instances.
+- Improved consistency between enemy class selection and XP reward assignment.
+
+---
+
 ## [v1.2.0] - 2026-07-20
 
 ### Added
@@ -45,6 +71,8 @@ The format is inspired by Keep a Changelog and the project follows Semantic Vers
 - Prevented invalid pointer dereferences when skill selection fails.
 - Improved handling of insufficient mana during skill usage.
 
+---
+
 ## [v1.1.0] - 2026-07-20
 
 ### Added
@@ -77,6 +105,8 @@ The format is inspired by Keep a Changelog and the project follows Semantic Vers
 
 - Prevented crashes caused by invalid stat selections during stat allocation.
 - Improved combat flow after victories and progression handling.
+
+---
 
 ## [v1.0.1] - 2026-07-17
 
